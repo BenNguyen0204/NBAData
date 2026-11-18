@@ -1,114 +1,115 @@
-# 🏀 Triple Double
+# 🏀 Triple Double: NBA Performance Analytics
 
-**An automated data pipeline that ingests NBA game data daily, models it in a tested data warehouse, and serves insights through an interactive dashboard.**
+**A business analytics project that turns NBA game data into KPIs, a Power BI dashboard, and recommendations a team's front office could act on.**
 
 ![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
-![Airflow](https://img.shields.io/badge/Airflow-017CEE?logo=apacheairflow&logoColor=white)
-![dbt](https://img.shields.io/badge/dbt-FF694B?logo=dbt&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
-![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?logo=streamlit&logoColor=white)
+![SQL](https://img.shields.io/badge/SQL-336791?logo=postgresql&logoColor=white)
+![Power BI](https://img.shields.io/badge/Power%20BI-F2C811?logo=powerbi&logoColor=black)
+![Excel](https://img.shields.io/badge/Excel-217346?logo=microsoftexcel&logoColor=white)
+
+> 🚧 **Status: in progress.** See [Roadmap](#roadmap) for what is done and what is next.
 
 ---
 
-## Overview
+## The Business Problem
 
-Triple Double collects box scores, player stats, and play-by-play data after every NBA game day, transforms it into analysis-ready tables, and powers a dashboard for exploring player form, team trends, and standings.
+NBA front offices and coaching staff make decisions every week about player minutes, rest days, and roster moves. Box score data is freely available, but it is scattered across thousands of games and hard to turn into clear answers.
 
-The project is built around production data engineering practices: incremental loading, idempotent runs, automated data quality tests, and one-command local deployment.
+This project acts as an analyst supporting a team's front office. It answers a short list of decision-focused questions with data and presents the answers in a dashboard and a short report.
+
+## Stakeholders & Business Questions
+
+| Stakeholder | Question | Why it matters |
+|---|---|---|
+| Coaching staff | Does performance drop on the second night of a back-to-back? | Informs rest and minutes decisions |
+| Coaching staff | Which players are trending up or down over their last 10 games? | Informs rotation decisions |
+| Front office | Which teams win more (or less) than their stats suggest? | Spots over- and under-performing teams |
+| Front office | Which players produce the most per minute played? | Helps find undervalued role players |
+| Analytics team | How do home and away results differ by team? | Identifies scheduling and travel effects |
+
+The full requirements, including user stories and KPI definitions, are in [`docs/requirements.md`](docs/requirements.md).
+
+## KPIs
+
+| KPI | Definition |
+|---|---|
+| Net Rating | Points scored minus points allowed per 100 possessions |
+| True Shooting % | Shooting efficiency including 3-pointers and free throws |
+| Rolling Form | A player's average game score over his last 10 games vs. his season average |
+| Back-to-Back Impact | Change in team net rating on the second night of back-to-backs |
+| Home/Away Split | Win % at home minus win % on the road |
+
+## Deliverables
+
+1. **Power BI dashboard** with team overview, player form tracker and back-to-back analysis pages
+2. **Insight report** (2 pages) with key findings and recommendations for coaching staff and the front office
+3. **Requirements document** covering stakeholders, user stories, KPI definitions and acceptance criteria
 
 ![Dashboard](docs/dashboard.png)
 
-## Architecture
+## Key Insights
+
+_Coming soon. Findings will be added here once the analysis is complete._
+
+## How It Works
 
 ```mermaid
 flowchart LR
-    A[NBA Stats API] -->|Python ingestion| B[(MinIO<br/>raw JSON)]
-    B -->|load| C[(PostgreSQL<br/>raw)]
-    C -->|dbt| D[staging]
-    D -->|dbt| E[marts]
-    E --> F[Streamlit<br/>dashboard]
-    G[Airflow] -.->|orchestrates daily| A
+    A[NBA Stats API] -->|Python + pandas| B[(PostgreSQL)]
+    B -->|SQL views| C[KPI tables]
+    C --> D[Power BI dashboard]
+    C --> E[Insight report]
 ```
 
-An Airflow DAG runs every morning to:
-
-1. Fetch the previous day's games, box scores, and play-by-play
-2. Store raw API responses in object storage, partitioned by date
-3. Load only new records into PostgreSQL
-4. Run dbt models and data quality tests
-5. Refresh the tables behind the dashboard
+1. A Python script pulls game, team and player box scores using `nba_api`
+2. pandas cleans the data (missing values, duplicate games, team name changes)
+3. Data is loaded into PostgreSQL
+4. SQL views calculate each KPI
+5. Power BI connects to the views for the dashboard
 
 ## Tech Stack
 
-| Layer | Technology |
+| Purpose | Tool |
 |---|---|
-| Ingestion | Python, `nba_api` |
-| Raw storage | MinIO (S3-compatible) |
-| Warehouse | PostgreSQL |
-| Transformation & testing | dbt Core |
-| Orchestration | Apache Airflow |
-| Dashboard | Streamlit |
-| Infrastructure | Docker, docker-compose |
-| CI | GitHub Actions |
-
-## Key Features
-
-- **Incremental loads:** only new games are fetched and loaded
-- **Idempotent pipeline:** re-running any day never creates duplicates
-- **Backfills:** load any past date range or season with a single command
-- **Resilient ingestion:** retries, rate limiting, and cached raw responses
-- **Data quality tests:** uniqueness, not-null, and referential integrity checks on every run
-- **Documented lineage:** auto-generated dbt docs show how every table is built
-
-## Data Model
-
-| Layer | Tables |
-|---|---|
-| **Staging** | `stg_games`, `stg_players`, `stg_teams`, `stg_box_scores`, `stg_play_by_play` |
-| **Facts** | `fct_player_game_stats`, `fct_team_game_stats` |
-| **Dimensions** | `dim_players`, `dim_teams`, `dim_dates` |
-| **Analytics** | `player_rolling_form`, `team_standings` |
-
-## Getting Started
-
-**Prerequisites:** Docker and Docker Compose
-
-```bash
-git clone https://github.com/your-username/triple-double.git
-cd triple-double
-docker-compose up -d
-```
-
-| Service | URL |
-|---|---|
-| Airflow | http://localhost:8080 |
-| Dashboard | http://localhost:8501 |
-
-Backfill a past season:
-
-```bash
-docker-compose exec airflow airflow dags backfill nba_daily -s 2025-10-21 -e 2026-04-12
-```
+| Data collection | Python, `nba_api` |
+| Cleaning | pandas |
+| Storage | PostgreSQL |
+| Analysis | SQL |
+| Dashboard | Power BI |
+| Report | Excel, Word/PDF |
 
 ## Project Structure
 
 ```
 triple-double/
-├── ingestion/          # API extraction and loading scripts
-├── dags/               # Airflow DAGs
-├── dbt/                # dbt models, tests, and docs
-│   └── models/
-│       ├── staging/
-│       └── marts/
-├── dashboard/          # Streamlit app
-├── .github/workflows/  # CI pipeline
-└── docker-compose.yml
+├── ingestion/        # Python scripts to fetch and clean data
+├── sql/              # SQL views for each KPI
+├── powerbi/          # Power BI dashboard (.pbix)
+├── docs/
+│   ├── requirements.md
+│   ├── insights_report.pdf
+│   └── dashboard.png
+└── README.md
 ```
 
-## Future Work
+## Getting Started
 
-- Game outcome prediction model with MLflow experiment tracking
-- Prediction API built with FastAPI
-- Natural-language questions over the warehouse using an LLM
-- Cloud deployment on AWS S3 and BigQuery
+```bash
+git clone https://github.com/BenNguyen0204/NBAData.git
+cd NBAData
+pip install -r requirements.txt
+python ingestion/load_games.py --season 2025-26
+```
+
+Then open `powerbi/triple_double.pbix` in Power BI Desktop and refresh the data source.
+
+## Roadmap
+
+- [ ] Write requirements document (stakeholders, user stories, KPIs)
+- [ ] Ingest 2025-26 season data into PostgreSQL
+- [ ] Build SQL views for each KPI
+- [ ] Build Power BI dashboard
+- [ ] Write insight report with recommendations
+- [ ] Add automated daily data refresh
+- [ ] Add data quality checks with dbt
