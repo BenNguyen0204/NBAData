@@ -46,7 +46,7 @@ The full requirements, including user stories and KPI definitions, are in [`docs
 2. **Insight report** (2 pages) with key findings and recommendations for coaching staff and the front office
 3. **Requirements document** covering stakeholders, user stories, KPI definitions and acceptance criteria
 
-![Dashboard](docs/dashboard.png)
+<!-- ![Dashboard](docs/dashboard.png) -->
 
 ## Key Insights
 
