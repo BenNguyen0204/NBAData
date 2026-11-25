@@ -1,0 +1,28 @@
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Secrets (database connection, API keys)
+.env
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Raw / cached data (re-downloadable with ingestion scripts)
+data/
+*.csv
+*.parquet
+
+# Power BI temp files (keep the .pbix itself)
+~$*.pbix
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
