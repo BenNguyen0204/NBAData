@@ -1,6 +1,8 @@
 -- Possessions, Rest Days, B2B flag
 
-CREATE OR REPLACE VIEW team_game_base AS
+DROP VIEW IF EXISTS team_game_base CASCADE;
+
+CREATE VIEW team_game_base AS
 SELECT
     t.game_id,
     t.game_date::date AS game_date,
