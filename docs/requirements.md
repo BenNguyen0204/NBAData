@@ -86,12 +86,14 @@ Priority uses MoSCoW: **M** = Must, **S** = Should, **C** = Could.
 
 | KPI | Formula | Unit | Notes |
 |---|---|---|---|
-| **Possessions (Poss)** | `FGA + 0.44 × FTA − ORB + TOV` | count | Estimate. For team games use the average of team and opponent possessions. |
+| **Possessions (Poss)** | `FGA + 0.44 × FTA − ORB + TOV` | count | Estimate. In `team_game_base`, `poss` is the average of team and opponent possessions, so both teams in a game share the same number. ORtg, DRtg and Pace all use this value. |
 | **Offensive Rating (ORtg)** | `100 × PTS / Poss` | pts / 100 poss | Points scored per 100 possessions |
 | **Defensive Rating (DRtg)** | `100 × Opp_PTS / Poss` | pts / 100 poss | Points allowed per 100 possessions. Lower is better. |
 | **Net Rating (NetRtg)** | `ORtg − DRtg` | pts / 100 poss | Main measure of team strength |
-| **Pace** | `48 × (Poss + Opp_Poss) / (2 × (Tm_MIN / 5))` | poss / 48 min | Adjusts for overtime |
+| **Pace** | `48 × (Poss + Opp_Poss) / (2 × (Tm_MIN / 5))` | poss / 48 min | Adjusts for overtime. In SQL, `poss` already equals (Poss + Opp_Poss) / 2, so this is written as `48 × poss / (min / 5)`. |
 | **Win%** | `Wins / Games` | % | |
+| **Expected Win% (Pythagorean)** | `PTS^14 / (PTS^14 + Opp_PTS^14)` | % | The win % a team "should" have based on season points scored and allowed. Written in SQL as `1 / (1 + (Opp_PTS / PTS)^14)` (same result, avoids huge numbers). |
+| **Win% vs Expected** | `Win% − Expected Win%` | % | Positive = winning more than the points suggest (clutch or lucky), negative = less. Answers "Which teams win more (or less) than their stats suggest?" |
 | **Effective FG% (eFG%)** | `(FGM + 0.5 × 3PM) / FGA` | % | Four Factors: shooting |
 | **Turnover % (TOV%)** | `TOV / (FGA + 0.44 × FTA + TOV)` | % | Four Factors: ball security. Lower is better. |
 | **Offensive Rebound % (ORB%)** | `ORB / (ORB + Opp_DRB)` | % | Four Factors: rebounding |
