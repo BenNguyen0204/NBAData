@@ -1,3 +1,5 @@
+-- Game Score (plus counting columns, team-level totals for Usage, excluding games with 0 minutes played)
+
 DROP VIEW IF EXISTS player_game_base;
 
 CREATE VIEW player_game_base AS
